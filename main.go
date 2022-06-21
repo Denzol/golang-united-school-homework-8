@@ -23,7 +23,7 @@ type List struct {
 }
 
 func Perform(args Arguments, writer io.Writer) error {
-	const k := "flag has to be specified"
+	const k = "flag has to be specified"
 	if args["operation"] == "" {
 		err := fmt.Errorf("-operation %s", k)
 		return err
