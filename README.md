@@ -30,7 +30,7 @@ If file is empty then nothing should be printed to the console.
 All cases are covered by unit tests. If you want to be sure your solution works correct, just start `go test -v` command in the root of the repo
 #### Adding new item:
 For adding new item to the array inside users.json file, application should provide the following cmd command:
-`./main -operation «add» -item «{«id»: "1", «email»: «email@test.com», «age»: 23}» -fileName «users.json»`
+`./main -operhation «add» -item «{«id»: "1", «email»: «email@test.com», «age»: 23}» -fileName «users.json»`
 `-item` - valid json object with the id, email and age fields
 **Errors:**
 1. All errors about operation and fileName flags mentioned above
