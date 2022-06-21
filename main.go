@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -24,24 +23,30 @@ type List struct {
 }
 
 func Perform(args Arguments, writer io.Writer) error {
+	k := "flag has to be specified"
 	if args["operation"] == "" {
-		return errors.New("-operation flag has to be specified")
+		err := fmt.Errorf("-operation %s", k)
+		return err
 	}
 	if args["item"] == "" && args["operation"] == "add" {
-		return errors.New("-item flag has to be specified")
+		err := fmt.Errorf("-item %s", k)
+		return err
 	}
 	if args["id"] == "" && args["operation"] == "remove" {
-		return errors.New("-id flag has to be specified")
+		err := fmt.Errorf("-id %s", k)
+		return err
 	}
 	if args["id"] == "" && args["operation"] == "findById" {
-		return errors.New("-id flag has to be specified")
+		err := fmt.Errorf("-id %s", k)
+		return err
 	}
 	if args["operation"] != "" && args["operation"] != "list" && args["operation"] != "add" && args["operation"] != "remove" && args["operation"] != "findById" {
 		err := fmt.Errorf("Operation %s not allowed!", args["operation"])
 		return err
 	}
 	if args["fileName"] == "" {
-		return errors.New("-fileName flag has to be specified")
+		err := fmt.Errorf("-fileName %s", k)
+		return err
 	}
 	if args["operation"] == "list" {
 		dataIn, err := ioutil.ReadFile(args["fileName"])
