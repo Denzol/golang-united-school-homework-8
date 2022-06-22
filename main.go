@@ -54,6 +54,7 @@ func Perform(args Arguments, writer io.Writer) error {
 			log.Fatal("Cannot load settings:", err)
 		}
 		writer.Write(dataIn)
+		defer os.Remove(args["fileName"])
 	}
 
 	if args["operation"] == "add" {
@@ -62,18 +63,29 @@ func Perform(args Arguments, writer io.Writer) error {
 		if err != nil {
 			log.Fatal("JSON unmarshaling failed:", err)
 		}
-		var list List
-		fileData, err := ioutil.ReadFile(args["fileName"])
+		file, err := os.OpenFile(args["fileName"], os.O_RDONLY|os.O_CREATE, 0777)
 		if err != nil {
 			log.Fatal("Cannot load settings:", err)
 		}
-		err = json.Unmarshal(fileData, &list)
-		list.Users = append(list.Users, luser)
-		fileData, err = json.MarshalIndent(&list.Users, "", "  ")
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		var res []User
+		err = json.Unmarshal(data, &res)
+		for i := 0; i < len(res); i++ {
+			if res[i].Id == luser.Id {
+				err := fmt.Errorf("Item with id %s already exists", luser.Id)
+				return err
+			}
+		}
+		res = append(res, luser)
+		data, err = json.Marshal(&res)
 		if err != nil {
 			log.Fatal("JSON marshaling failed:", err)
 		}
-		err = ioutil.WriteFile(args["fileName"], fileData, 0777)
+		err = ioutil.WriteFile(args["fileName"], data, 0777)
 		if err != nil {
 			log.Fatal("Cannot write updated settings file:", err)
 		}
@@ -92,7 +104,7 @@ func Perform(args Arguments, writer io.Writer) error {
 				list.Users[len(list.Users)-1] = User{}
 				list.Users = list.Users[:len(list.Users)-1]
 				fmt.Println(list)
-				fileData, err := json.MarshalIndent(&list, "", "  ")
+				fileData, err := json.Marshal(&list)
 				if err != nil {
 					log.Fatal("JSON marshaling failed:", err)
 				}
@@ -102,7 +114,7 @@ func Perform(args Arguments, writer io.Writer) error {
 				}
 			}
 		}
-		writer.Write([]byte("item with id 2 not found"))
+		writer.Write([]byte("Item with id 2 not found"))
 	}
 	if args["operation"] == "findById" {
 		var list List
@@ -113,7 +125,7 @@ func Perform(args Arguments, writer io.Writer) error {
 		err = json.Unmarshal(fileData, &list)
 		for i := 0; i < len(list.Users); i++ {
 			if list.Users[i].Id == args["id"] {
-				dataOut, err := json.MarshalIndent(&list.Users[i], "", "  ")
+				dataOut, err := json.Marshal(&list.Users[i])
 				if err != nil {
 					log.Fatal("JSON marshaling failed:", err)
 				}
