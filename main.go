@@ -102,6 +102,9 @@ func Perform(args Arguments, writer io.Writer) error {
 		defer file.Close()
 		var res []User
 		err = json.Unmarshal(data, &res)
+		if err != nil {
+			log.Fatal(err)
+		}
 		for i := 0; i < len(res); i++ {
 			if res[i].Id == "1" {
 				res[i] = res[len(res)-1]
@@ -132,6 +135,9 @@ func Perform(args Arguments, writer io.Writer) error {
 		defer file.Close()
 		var res []User
 		err = json.Unmarshal(data, &res)
+		if err != nil {
+			log.Fatal(err)
+		}
 		for i := 0; i < len(res); i++ {
 			if res[i].Id == args["id"] {
 				dataOut, err := json.Marshal(&res[i])
