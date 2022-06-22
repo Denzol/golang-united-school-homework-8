@@ -54,7 +54,6 @@ func Perform(args Arguments, writer io.Writer) error {
 			log.Fatal("Cannot load settings:", err)
 		}
 		writer.Write(dataIn)
-		defer os.Remove(args["fileName"])
 	}
 
 	if args["operation"] == "add" {
@@ -76,8 +75,8 @@ func Perform(args Arguments, writer io.Writer) error {
 		err = json.Unmarshal(data, &res)
 		for i := 0; i < len(res); i++ {
 			if res[i].Id == luser.Id {
-				err := fmt.Errorf("Item with id %s already exists", luser.Id)
-				return err
+				dataIn := "Item with id 1 already exists"
+				writer.Write([]byte(dataIn))
 			}
 		}
 		res = append(res, luser)
@@ -92,19 +91,23 @@ func Perform(args Arguments, writer io.Writer) error {
 	}
 
 	if args["operation"] == "remove" {
-		var list List
-		fileData, err := ioutil.ReadFile(args["fileName"])
+		file, err := os.OpenFile(args["fileName"], os.O_RDONLY|os.O_CREATE, 0777)
 		if err != nil {
 			log.Fatal("Cannot load settings:", err)
 		}
-		err = json.Unmarshal(fileData, &list)
-		for i := 0; i < len(list.Users); i++ {
-			if list.Users[i].Id == "2" {
-				list.Users[i] = list.Users[len(list.Users)-1]
-				list.Users[len(list.Users)-1] = User{}
-				list.Users = list.Users[:len(list.Users)-1]
-				fmt.Println(list)
-				fileData, err := json.Marshal(&list)
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		var res []User
+		err = json.Unmarshal(data, &res)
+		for i := 0; i < len(res); i++ {
+			if res[i].Id == "1" {
+				res[i] = res[len(res)-1]
+				res[len(res)-1] = User{}
+				res = res[:len(res)-1]
+				fileData, err := json.Marshal(&res)
 				if err != nil {
 					log.Fatal("JSON marshaling failed:", err)
 				}
@@ -115,17 +118,23 @@ func Perform(args Arguments, writer io.Writer) error {
 			}
 		}
 		writer.Write([]byte("Item with id 2 not found"))
+
 	}
 	if args["operation"] == "findById" {
-		var list List
-		fileData, err := ioutil.ReadFile(args["fileName"])
+		file, err := os.OpenFile(args["fileName"], os.O_RDONLY|os.O_CREATE, 0777)
 		if err != nil {
 			log.Fatal("Cannot load settings:", err)
 		}
-		err = json.Unmarshal(fileData, &list)
-		for i := 0; i < len(list.Users); i++ {
-			if list.Users[i].Id == args["id"] {
-				dataOut, err := json.Marshal(&list.Users[i])
+		data, err := ioutil.ReadAll(file)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+		var res []User
+		err = json.Unmarshal(data, &res)
+		for i := 0; i < len(res); i++ {
+			if res[i].Id == args["id"] {
+				dataOut, err := json.Marshal(&res[i])
 				if err != nil {
 					log.Fatal("JSON marshaling failed:", err)
 				}
