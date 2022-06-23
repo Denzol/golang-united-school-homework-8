@@ -1,3 +1,3 @@
-module main.go
+module flags
 
 go 1.17
